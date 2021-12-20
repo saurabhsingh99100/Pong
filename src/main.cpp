@@ -135,30 +135,41 @@ class Ball
     int update(float win_x_lim, float win_y_lim, Paddle * bat, sf::RenderWindow * win, unsigned int *score)
     {
         // Left wall & right wall
-        if(object->getPosition().x == 0 || object->getPosition().x+2*radius == win_x_lim)
+        if(object->getPosition().x <= 0 || object->getPosition().x+2*radius >= win_x_lim)
         {
             x_vel = -x_vel;
             sound_ball_wall_collision.play();   // play sound
         }
 
         // Top wall
-        else if(object->getPosition().y == 0)
+        else if(object->getPosition().y <= 0)
         {
             y_vel = -y_vel;
             sound_ball_wall_collision.play();   // play sound
         }
 
         // Paddle
-        else if (object->getPosition().y+2*radius == bat->object->getPosition().y)
+        else if ((object->getPosition().y+2*radius >= bat->object->getPosition().y) && (object->getPosition().y+2*radius <= win_y_lim))
         {
             if((object->getPosition().x+radius > bat->object->getPosition().x) && (object->getPosition().x+radius <= bat->object->getPosition().x+bat->x_dim))
             {
                 y_vel = -y_vel;
                 sound_ball_bat_collision.play();    // play sound
                 *score+=10;
+
+                if(x_vel<0)
+                    x_vel-=0.1;
+                else
+                    x_vel+=0.1;
+                
+                if(y_vel<0)
+                    y_vel-=0.1;
+                else
+                    y_vel+=0.1;
+
             }
         }
-        else if (object->getPosition().y+2*radius == win_y_lim)
+        else if (object->getPosition().y+2*radius > win_y_lim)
         {
             return 1;
         }
