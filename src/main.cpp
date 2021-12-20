@@ -56,6 +56,12 @@ class Ball
     float radius;
     sf::Color color;
 
+    // Sounds
+    sf::SoundBuffer buffer_ball_wall_collision;
+    sf::SoundBuffer buffer_ball_bat_collision;
+    sf::Sound sound_ball_wall_collision;
+    sf::Sound sound_ball_bat_collision;
+
     Ball(int x, float y, float ball_radius, sf::Color ball_color)
     {
         // initialize internal variables
@@ -67,6 +73,23 @@ class Ball
         object = new sf::CircleShape(radius);
         object->setFillColor(color);
         object->setPosition(x, y);
+
+        // Load sounds
+        std::cout << "Loading Sounds...   ";
+        if (!buffer_ball_wall_collision.loadFromFile("include/ball-collision1.ogg"))
+        {   
+            std::cerr << "\nUnable to load : include/ball-collision1.ogg" << std::endl;
+            return;
+        }
+        if (!buffer_ball_bat_collision.loadFromFile("include/ball-collision2.ogg"))
+        {
+            std::cerr << "\nUnable to load : include/ball-collision2.ogg" << std::endl;
+            return;
+        }
+
+        sound_ball_wall_collision.setBuffer(buffer_ball_wall_collision);
+        sound_ball_bat_collision.setBuffer(buffer_ball_bat_collision);
+        std::cout << "Finished!\n";
     }
 
     ~Ball()
@@ -86,18 +109,20 @@ class Ball
         y_vel = y;
     }
 
-    void update(float win_x_lim, float win_y_lim, Paddle * bat, sf::RenderWindow * win)
+    int update(float win_x_lim, float win_y_lim, Paddle * bat, sf::RenderWindow * win)
     {
         // Left wall & right wall
         if(object->getPosition().x == 0 || object->getPosition().x+2*radius == win_x_lim)
         {
             x_vel = -x_vel;
+            sound_ball_wall_collision.play();   // play sound
         }
 
         // Top wall
         else if(object->getPosition().y == 0)
         {
             y_vel = -y_vel;
+            sound_ball_wall_collision.play();   // play sound
         }
 
         // Paddle
@@ -106,17 +131,19 @@ class Ball
             if((object->getPosition().x+radius > bat->object->getPosition().x) && (object->getPosition().x+radius <= bat->object->getPosition().x+bat->x_dim))
             {
                 y_vel = -y_vel;
+                sound_ball_bat_collision.play();    // play sound
             }
         }
         else if (object->getPosition().y+2*radius == win_y_lim)
         {
-            win->close();
+            return 1;
         }
 
         // update pos
         float new_x = object->getPosition().x + x_vel;
         float new_y = object->getPosition().y + y_vel;
         object->setPosition(new_x, new_y);
+        return 0;
     }
 };
 
@@ -178,7 +205,22 @@ int main()
         static int framecount = 0;
         if (framecount == 10)
         {
-            ball.update(window_x_sz, window_y_sz, &bat, &window);
+            if(ball.update(window_x_sz, window_y_sz, &bat, &window) == 1)
+            {
+                // Game over
+                sf::Music game_over_music;
+                if (!game_over_music.openFromFile("include/game-over.ogg"))
+                {
+                    std::cerr << "Unable to load: include/game-over.ogg"<< std::endl;
+                    return 1;
+                }
+
+                music.stop();
+                game_over_music.play();
+                
+                while(game_over_music.getStatus() == sf::Music::Playing);
+                window.close();
+            }
             framecount = -1;
         }
         framecount++;
