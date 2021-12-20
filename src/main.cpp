@@ -293,5 +293,7 @@ int main()
         // End current frame
         window.display();
     }
+    std::cout << "Final Score: "<<score<<std::endl;
+
     return 0;
 }

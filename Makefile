@@ -9,7 +9,7 @@ LFLAGS=-Wall -lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system
 
 INC= -I$(LIB_DIR)/glfw/include/ -Iinclude
 
-EXECUTABLE=$(BIN_DIR)/a.out
+EXECUTABLE=$(BIN_DIR)/pong
 
 SRCS := $(wildcard $(SRC_DIR)/*.cpp)
 OBJS :=  $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
@@ -20,6 +20,10 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 $(EXECUTABLE): $(OBJS)
 	$(CC) $< -o $@ $(LFLAGS)
+
+.PHONY: run
+run: $(EXECUTABLE)
+	./$(EXECUTABLE)
 
 .PHONY: clean
 clean:
