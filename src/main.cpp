@@ -182,6 +182,22 @@ int main()
     // create the window
     sf::RenderWindow window(sf::VideoMode(window_x_sz, window_y_sz), "Pong");
 
+   // Create a texture to hold a graphic on the GPU   
+   sf::Texture textureBackground;   
+
+   // Load a graphic into the texture
+   textureBackground.loadFromFile("include/background.png");   
+
+   // Create a sprite
+   sf::Sprite spriteBackground;   
+
+   // Attach the texture to the sprite
+   spriteBackground.setTexture(textureBackground);   
+
+   // Set the spriteBackground to cover the screen
+   spriteBackground.setPosition(0,0);
+
+
     // Play music
     sf::Music music;
     if (!music.openFromFile("include/Hotel_California_8-Bit.ogg"))
@@ -247,6 +263,7 @@ int main()
         }
         framecount++;
 
+        window.draw(spriteBackground);
         window.draw(*ball.object);
         window.draw(*bat.object);
 
