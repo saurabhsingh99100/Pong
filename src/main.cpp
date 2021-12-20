@@ -16,7 +16,10 @@ class Paddle
     Paddle(float x, float y, float paddle_step, sf::Color paddle_colour, float win_x_lim, float win_y_lim)
     {
         step = paddle_step;
-        object = new sf::RectangleShape(sf::Vector2f(x,y));
+        x_dim = x;
+        y_dim = y;
+
+        object = new sf::RectangleShape(sf::Vector2f(x_dim,y_dim));
         object->setFillColor(paddle_colour);
         object->setPosition(win_x_lim/2, win_y_lim - y/2);
     }
@@ -91,17 +94,20 @@ class Ball
         }
 
         // Top wall
-        if(object->getPosition().y == 0)
+        else if(object->getPosition().y == 0)
         {
             y_vel = -y_vel;
         }
 
         // Paddle
-        // if (object->getPosition().y+2*radius == bat->object->getPosition().y)
-        // {
-        //     std::cout << "Hit!\n";
-        // }
-        if (object->getPosition().y+2*radius == win_y_lim)
+        else if (object->getPosition().y+2*radius == bat->object->getPosition().y)
+        {
+            if((object->getPosition().x+radius > bat->object->getPosition().x) && (object->getPosition().x+radius <= bat->object->getPosition().x+bat->x_dim))
+            {
+                y_vel = -y_vel;
+            }
+        }
+        else if (object->getPosition().y+2*radius == win_y_lim)
         {
             win->close();
         }
@@ -120,7 +126,7 @@ int main()
     // initialize variables
     int window_x_sz = 800, window_y_sz = 600;
     Ball ball(window_x_sz/2, window_y_sz/2, 15, sf::Color::Green);
-    Paddle bat(100, 15, 5, sf::Color::Yellow, window_x_sz, window_y_sz);
+    Paddle bat(100, 15, 10, sf::Color::Yellow, window_x_sz, window_y_sz);
 
     /////////////////////////////////////////////////////
     // create the window
