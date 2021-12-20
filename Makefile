@@ -5,7 +5,7 @@ BIN_DIR=bin
 
 CC=g++
 CFLAGS=-Wall
-LFLAGS=-Wall -lsfml-graphics -lsfml-window -lsfml-system
+LFLAGS=-Wall -lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system
 
 INC= -I$(LIB_DIR)/glfw/include/ -Iinclude
 

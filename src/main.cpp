@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <iostream>
 
 class Paddle
@@ -131,6 +132,12 @@ int main()
     /////////////////////////////////////////////////////
     // create the window
     sf::RenderWindow window(sf::VideoMode(window_x_sz, window_y_sz), "Pong");
+
+    // Play music
+    sf::Music music;
+    if (!music.openFromFile("include/Hotel_California_8-Bit.ogg"))
+        return -1; // error
+    music.play();
 
     // run the program as long as the window is open
     while (window.isOpen())
