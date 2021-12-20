@@ -14,6 +14,9 @@ class Paddle
     float x_dim, y_dim;
     sf::Color color;
 
+    // Texture
+    sf::Texture bat_texture;
+
     Paddle(float x, float y, float paddle_step, sf::Color paddle_colour, float win_x_lim, float win_y_lim)
     {
         step = paddle_step;
@@ -23,6 +26,14 @@ class Paddle
         object = new sf::RectangleShape(sf::Vector2f(x_dim,y_dim));
         object->setFillColor(paddle_colour);
         object->setPosition(win_x_lim/2, win_y_lim - y/2);
+
+        // Texture
+        if(!bat_texture.loadFromFile("include/wood-texture.png"))
+        {
+            std::cerr << "Unable to load: include/wood-texture.png\n";
+            return;
+        }
+        object->setTexture(&bat_texture);
     }
 
     ~Paddle()
@@ -62,6 +73,9 @@ class Ball
     sf::Sound sound_ball_wall_collision;
     sf::Sound sound_ball_bat_collision;
 
+    // Texture
+    sf::Texture ball_texture;
+
     Ball(int x, float y, float ball_radius, sf::Color ball_color)
     {
         // initialize internal variables
@@ -71,8 +85,16 @@ class Ball
 
         // initialize ball object
         object = new sf::CircleShape(radius);
-        object->setFillColor(color);
+        //object->setFillColor(color);
         object->setPosition(x, y);
+
+        if(!ball_texture.loadFromFile("include/ball.png"))
+        {
+            std::cerr << "Unable to load: include/ball.png\n";
+            return;
+        }
+        object->setTexture(&ball_texture);
+
 
         // Load sounds
         std::cout << "Loading Sounds...   ";
