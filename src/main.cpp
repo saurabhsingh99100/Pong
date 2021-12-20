@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <iostream>
+#include <string>
 
 class Paddle
 {
@@ -131,7 +132,7 @@ class Ball
         y_vel = y;
     }
 
-    int update(float win_x_lim, float win_y_lim, Paddle * bat, sf::RenderWindow * win)
+    int update(float win_x_lim, float win_y_lim, Paddle * bat, sf::RenderWindow * win, unsigned int *score)
     {
         // Left wall & right wall
         if(object->getPosition().x == 0 || object->getPosition().x+2*radius == win_x_lim)
@@ -154,6 +155,7 @@ class Ball
             {
                 y_vel = -y_vel;
                 sound_ball_bat_collision.play();    // play sound
+                *score+=10;
             }
         }
         else if (object->getPosition().y+2*radius == win_y_lim)
@@ -178,25 +180,31 @@ int main()
     Ball ball(window_x_sz/2, window_y_sz/2, 15, sf::Color::Green);
     Paddle bat(100, 15, 10, sf::Color::Yellow, window_x_sz, window_y_sz);
 
+    unsigned int score=0;
+
     /////////////////////////////////////////////////////
     // create the window
     sf::RenderWindow window(sf::VideoMode(window_x_sz, window_y_sz), "Pong");
 
-   // Create a texture to hold a graphic on the GPU   
-   sf::Texture textureBackground;   
+    // Add background to window
+    sf::Texture textureBackground;   
+    textureBackground.loadFromFile("include/background.png");   
+    sf::Sprite spriteBackground;   
+    spriteBackground.setTexture(textureBackground);   
+    spriteBackground.setPosition(0,0);
 
-   // Load a graphic into the texture
-   textureBackground.loadFromFile("include/background.png");   
-
-   // Create a sprite
-   sf::Sprite spriteBackground;   
-
-   // Attach the texture to the sprite
-   spriteBackground.setTexture(textureBackground);   
-
-   // Set the spriteBackground to cover the screen
-   spriteBackground.setPosition(0,0);
-
+    // Add scoreboard
+    sf::Text scoreboard;
+    sf::Font sos_font;
+    if (!sos_font.loadFromFile("include/Calibri_Bold.ttf"))
+    {
+        std::cerr << "error loading font file: include/Calibri_Bold.ttf" << std::endl;
+    }
+    scoreboard.setFont(sos_font); // font is a sf::Font
+    scoreboard.setCharacterSize(24); // in pixels, not points!
+    scoreboard.setFillColor(sf::Color::Red);
+    scoreboard.setStyle(sf::Text::Bold);
+    scoreboard.setPosition(10, 10);
 
     // Play music
     sf::Music music;
@@ -243,7 +251,7 @@ int main()
         static int framecount = 0;
         if (framecount == 10)
         {
-            if(ball.update(window_x_sz, window_y_sz, &bat, &window) == 1)
+            if(ball.update(window_x_sz, window_y_sz, &bat, &window, &score) == 1)
             {
                 // Game over
                 sf::Music game_over_music;
@@ -266,6 +274,9 @@ int main()
         window.draw(spriteBackground);
         window.draw(*ball.object);
         window.draw(*bat.object);
+
+        scoreboard.setString("Score: "+std::to_string(score));
+        window.draw(scoreboard);
 
         /////////////////////////////////////////////////
         // End current frame
