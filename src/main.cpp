@@ -1,4 +1,44 @@
 #include <SFML/Graphics.hpp>
+#include <iostream>
+
+class Paddle
+{
+    public:
+    sf::RectangleShape * object;
+
+    // movestep
+    float step;
+
+    // properties
+    float x_dim, y_dim;
+    sf::Color color;
+
+    Paddle(float x, float y, float paddle_step, sf::Color paddle_colour, float win_x_lim, float win_y_lim)
+    {
+        step = paddle_step;
+        object = new sf::RectangleShape(sf::Vector2f(x,y));
+        object->setFillColor(paddle_colour);
+        object->setPosition(win_x_lim/2, win_y_lim - y/2);
+    }
+
+    ~Paddle()
+    {
+        delete object;
+    }
+
+    void moveLeft()
+    {
+        if(object->getPosition().x != 0)
+            object->setPosition(object->getPosition().x - step, object->getPosition().y);
+    }
+
+    void moveRight(float win_y_lim)
+    {
+        if(object->getPosition().x+object->getSize().x != win_y_lim)
+            object->setPosition(object->getPosition().x + step, object->getPosition().y);
+    }
+};
+
 
 class Ball
 {
@@ -12,12 +52,12 @@ class Ball
     float radius;
     sf::Color color;
 
-    Ball(int x, float y, float ballradius, sf::Color ballcolor)
+    Ball(int x, float y, float ball_radius, sf::Color ball_color)
     {
         // initialize internal variables
         setVel(-0.5, -0.5);
-        radius = ballradius;
-        color = ballcolor;
+        radius = ball_radius;
+        color = ball_color;
 
         // initialize ball object
         object = new sf::CircleShape(radius);
@@ -42,7 +82,7 @@ class Ball
         y_vel = y;
     }
 
-    void update(float win_x_lim, float win_y_lim)
+    void update(float win_x_lim, float win_y_lim, Paddle * bat, sf::RenderWindow * win)
     {
         // Left wall & right wall
         if(object->getPosition().x == 0 || object->getPosition().x+2*radius == win_x_lim)
@@ -50,10 +90,20 @@ class Ball
             x_vel = -x_vel;
         }
 
-        // Top wall & Bottom wall
-        if(object->getPosition().y == 0 || object->getPosition().y+2*radius == win_y_lim)
+        // Top wall
+        if(object->getPosition().y == 0)
         {
             y_vel = -y_vel;
+        }
+
+        // Paddle
+        // if (object->getPosition().y+2*radius == bat->object->getPosition().y)
+        // {
+        //     std::cout << "Hit!\n";
+        // }
+        if (object->getPosition().y+2*radius == win_y_lim)
+        {
+            win->close();
         }
 
         // update pos
@@ -70,6 +120,7 @@ int main()
     // initialize variables
     int window_x_sz = 800, window_y_sz = 600;
     Ball ball(window_x_sz/2, window_y_sz/2, 15, sf::Color::Green);
+    Paddle bat(100, 15, 5, sf::Color::Yellow, window_x_sz, window_y_sz);
 
     /////////////////////////////////////////////////////
     // create the window
@@ -82,9 +133,28 @@ int main()
         sf::Event event;
         while (window.pollEvent(event))
         {
-            // "close requested" event: we close the window
-            if (event.type == sf::Event::Closed)
-                window.close();
+            switch(event.type)
+            {
+                case sf::Event::Closed:
+                    window.close();
+                    break;
+                
+                case sf::Event::KeyPressed:
+                    if(event.key.code == sf::Keyboard::Left)
+                    {
+                        bat.moveLeft();
+                    }
+                    else if(event.key.code == sf::Keyboard::Right)
+                    {
+                        bat.moveRight(window_x_sz);
+                    }
+                    else if(event.key.code == sf::Keyboard::Escape)
+                        window.close();
+                    break;
+
+                default:
+                    break;
+            }
         }
 
         window.clear();
@@ -95,12 +165,13 @@ int main()
         static int framecount = 0;
         if (framecount == 10)
         {
-            ball.update(window_x_sz, window_y_sz);
+            ball.update(window_x_sz, window_y_sz, &bat, &window);
             framecount = -1;
         }
         framecount++;
 
         window.draw(*ball.object);
+        window.draw(*bat.object);
 
         /////////////////////////////////////////////////
         // End current frame
